@@ -19,3 +19,17 @@ def lambda_handler(event, context):
   
   print("Event details : ", event)
   print("Input Filename : ", filename)
+  #get s3 object
+  result = s3_client.get_object(Bucket=bucketName, Key=filename)
+  #Read a text file line by line using splitlines object
+  final_document_array = ""
+  for line in result["Body"].read().splitlines():
+      each_line = line.decode('utf-8')
+      print("Input Line : ",each_line)
+      if(each_line!=''): #dont process empty lines
+          translated=translate_text(each_line, 'bn')
+          print("After translation : ",translated)
+          final_document_array+=translated
+          final_document_array+='\n\n'
+  s3_client.put_object(Body=final_document_array, Bucket='outputtranslateddoc', Key=file_name)
+  print("Done")
